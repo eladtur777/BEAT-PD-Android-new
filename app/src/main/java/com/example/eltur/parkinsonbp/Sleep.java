@@ -24,7 +24,13 @@ import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.example.eltur.parkinsonbp.HttpClient.HttpClient;
+import com.example.eltur.parkinsonbp.ServerClass.SleepConditionAndDisorder;
+import com.example.eltur.parkinsonbp.ServerClass.SleepDisorderUpdate;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Eltur on 12/06/2017.
@@ -32,6 +38,9 @@ import java.util.ArrayList;
 
 public class Sleep extends AppCompatActivity {
 
+    SleepConditionAndDisorder sd;
+   // private SleepDisorderUpdate[] sda;
+    private List<SleepDisorderUpdate> sda;
     Button btnSave;
     EditText txtBoxHoursNum;
     EditText txtBoxQualitySleep;
@@ -39,7 +48,7 @@ public class Sleep extends AppCompatActivity {
     String userid ="";
     private CheckBox[] cb;
     ArrayList<String> subMenuSleepQuality = new ArrayList<String>();
-
+  // ArrayList<String>
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +60,19 @@ public class Sleep extends AppCompatActivity {
         txtBoxHoursNum= (EditText)findViewById(R.id.txtBoxHoursNumber);
         txtBoxQualitySleep =(EditText)findViewById(R.id.txtBoxQualitySleepNumber);
         SleepDisorder = new ArrayList<String>();
-
-       // AddChkBox();
+        sd = new SleepConditionAndDisorder();
+        AddChkBox();
         txtBoxQualitySleep.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     txtBoxQualitySleep.setInputType(0);
-                    SleepQualitySubMenu(txtBoxQualitySleep);
+                    if(subMenuSleepQuality.size() > 0) {
+                        subMenuSleepQuality.clear();
+                        connectToDB conn1 = new connectToDB();
+                        subMenuSleepQuality = conn1.getAllSleepQualitySubMenu();
+                        getPopUpSubMenu(txtBoxQualitySleep);
+                    }
                     txtBoxQualitySleep.clearFocus();
 
                 }
@@ -69,24 +83,25 @@ public class Sleep extends AppCompatActivity {
             }
         });
 
-       /* txtBoxQualitySleep.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                InputMethodManager im = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                im.hideSoftInputFromWindow(txtBoxQualitySleep.getWindowToken(), 0);
-                //SleepQualitySubMenu(txtBoxQualitySleep);
-            }
-        });*/
-
-        AddChkBox();
         btnSave.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                ArrayList<String> userchoice = new ArrayList<String>();
-
+             //   ArrayList<String> userchoice = new ArrayList<String>();
+                int objectSize =0;
+                for (int i = 0; i < cb.length; i++) {
+                    if (cb[i].isChecked()) {
+                        objectSize++;
+                    }
+                }
+                sda = new ArrayList<SleepDisorderUpdate>(objectSize);
+               // sda = new SleepDisorderUpdate[objectSize];
+                int j=0;
                 boolean ischkbox = false;
                 for (int i = 0; i < SleepDisorder.size(); i++) {
                     if (cb[i].isChecked()) {
-                        String val = cb[i].getText().toString();
-                        userchoice.add(val);
+                         String val = cb[i].getText().toString();
+                        sda.add(j,new SleepDisorderUpdate());
+                        sda.get(j).setSleepDisorderName(val);
+                        j++;
                         ischkbox = true;
                     }
 
@@ -113,9 +128,14 @@ public class Sleep extends AppCompatActivity {
                 connectToDB addDataToDB= new connectToDB();
                 userid = getIntent().getStringExtra("EXTRA_SESSION_ID");
                 ArrayList<String> arrOfSleepCondition = new ArrayList<String>();
-                arrOfSleepCondition.add(txtBoxHoursNum.getText().toString());
-                arrOfSleepCondition.add(txtBoxQualitySleep.getText().toString());
-                String returnVal = addDataToDB.AddDataToDB(userid,null,null,null,null,userchoice,arrOfSleepCondition);
+               // arrOfSleepCondition.add(txtBoxHoursNum.getText().toString());
+               // arrOfSleepCondition.add(txtBoxQualitySleep.getText().toString());
+                Long ToConvert =  Long.parseLong(txtBoxHoursNum.getText().toString());
+                sd.setSleepHours(ToConvert);
+                sd.setSleepQuality(txtBoxQualitySleep.getText().toString());
+                sd.setSleepDisorders(sda);
+
+                String returnVal = addDataToDB.AddDataToDB(userid,null,null,null,null,sd);
 
                 if(returnVal == "Success")
                 {
@@ -171,6 +191,8 @@ public class Sleep extends AppCompatActivity {
 
         //TODO:
         SleepDisorder = conn.getAllSleepDisorder();
+        subMenuSleepQuality = conn.getAllSleepQualitySubMenu();
+
 
         cb = new CheckBox[SleepDisorder.size()];
         for (int i = 0; i < SleepDisorder.size(); i++) {
@@ -205,9 +227,9 @@ public class Sleep extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     txtBoxQualitySleep.setInputType(0);
-                    SleepQualitySubMenu(txtBoxQualitySleep);
-
-
+                    if(subMenuSleepQuality.size() > 0) {
+                        getPopUpSubMenu(txtBoxQualitySleep);
+                    }
                 }
                 else
                 {
@@ -220,38 +242,40 @@ public class Sleep extends AppCompatActivity {
 
     }
 
-    private void SleepQualitySubMenu(EditText edtxt) {
+    private void getPopUpSubMenu(EditText edtxt)
+    {
        // final int ind = index;
         final PopupMenu popup = new PopupMenu(Sleep.this, edtxt);
         popup.getMenuInflater()
-                .inflate(R.menu.popup_menu_sleep_quality, popup.getMenu());
+                .inflate(R.menu.popup_menu_activities_general, popup.getMenu());
+        popup.dismiss();
+        //Add Dynamic submenu items
+        for(int i = 0; i < subMenuSleepQuality.size() ;i++) {
+            popup.getMenu().add(1, i ,i, subMenuSleepQuality.get(i).toString());
+            //groupId,ItemId,order,title
+        }
+        popup.getMenu().setGroupCheckable(1,true,true);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.one:
-                        item.setChecked(true);
-                        break;
-                    case R.id.two:
-                        item.setChecked(true);
-                        break;
-                    case R.id.three:
-                        item.setChecked(true);
-                        break;
-                }
-                txtBoxQualitySleep.setHint("איך היית מגדיר/ה את שנת הלילה שלך?"+"["+item.getTitle().toString()+"]");
+                item.setChecked(true);
+               // txtBoxQualitySleep.setHint("איך היית מגדיר/ה את שנת הלילה שלך?"+"["+item.getTitle().toString()+"]");
+                txtBoxQualitySleep.setText(item.getTitle().toString());
+               // txtBoxQualitySleep.setHint("איך היית מגדיר/ה את שנת הלילה שלך?");
                 subMenuSleepQuality.add(item.getTitle().toString());
-
-
                 return true;
             }
         });
+
         InputMethodManager im = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         im.hideSoftInputFromWindow(txtBoxQualitySleep.getWindowToken(), 0);
         popup.show();
         if(subMenuSleepQuality.isEmpty()) {
-            txtBoxQualitySleep.setHint("איך היית מגדיר/ה את שנת הלילה שלך?");
+            txtBoxQualitySleep.setText(subMenuSleepQuality.get(0).toString());
+           // txtBoxQualitySleep.setHint("איך היית מגדיר/ה את שנת הלילה שלך?");
         }
+
     }
+
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(getBaseContext(), firstpage.class);

@@ -2,11 +2,13 @@ package com.example.eltur.parkinsonbp.HttpClient;
 
 import com.example.eltur.parkinsonbp.ServerClass.Activity;
 import com.example.eltur.parkinsonbp.ServerClass.Habit;
+import com.example.eltur.parkinsonbp.ServerClass.Links;
 import com.example.eltur.parkinsonbp.ServerClass.Medicine;
 import com.example.eltur.parkinsonbp.ServerClass.MoodCondition;
 import com.example.eltur.parkinsonbp.ServerClass.PatientRecord;
 import com.example.eltur.parkinsonbp.ServerClass.SleepCondition;
 import com.example.eltur.parkinsonbp.ServerClass.SleepDisorder;
+import com.example.eltur.parkinsonbp.ServerClass.SleepQuality;
 import com.example.eltur.parkinsonbp.ServerClass.SubMenu;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +48,25 @@ public class HttpClient {
     private static ArrayList<String> activitiesList = new ArrayList<>();
     private static ArrayList<SubMenu> subMenuList = new ArrayList<>();
 
+    public static ArrayList<String> getSubMenuListSleepCondition() {
+        return subMenuListSleepCondition;
+    }
+
+    public static void setSubMenuListSleepCondition(ArrayList<String> subMenuListSleepCondition) {
+        HttpClient.subMenuListSleepCondition = subMenuListSleepCondition;
+    }
+
+    public static ArrayList<String> getMedicineSerialNumbers() {
+        return MedicineSerialNumbers;
+    }
+
+    public static void setMedicineSerialNumbers(ArrayList<String> medicineSerialNumbers) {
+        MedicineSerialNumbers = medicineSerialNumbers;
+    }
+
+    private static  ArrayList<String> MedicineSerialNumbers = new ArrayList<>();
+    private static  ArrayList<String> subMenuListSleepCondition = new ArrayList<>();
+    private static  ArrayList<String> LinksList = new ArrayList<>();
     public static List<List<SubMenu>> getSubMenuListActivities() {
         return subMenuListActivities;
     }
@@ -142,6 +164,26 @@ public class HttpClient {
     }
 
     private static SleepCondition[] jsonSleepCondition;
+
+    public static SleepQuality[] getJsonSleepQualitySubMenu() {
+        return jsonSleepQualitySubMenu;
+    }
+
+    public static void setJsonSleepQualitySubMenu(SleepQuality[] jsonSleepQualitySubMenu) {
+        HttpClient.jsonSleepQualitySubMenu = jsonSleepQualitySubMenu;
+    }
+
+    private static SleepQuality[] jsonSleepQualitySubMenu;
+
+    public static Links[] getJsonLinks() {
+        return jsonLinks;
+    }
+
+    public static void setJsonLinks(Links[] jsonLinks) {
+        HttpClient.jsonLinks = jsonLinks;
+    }
+
+    private static Links[] jsonLinks;
     public static MoodCondition[] getJsonMood() {
         return jsonMood;
     }
@@ -201,7 +243,7 @@ public class HttpClient {
         }
         catch (IOException IO){
 
-           // System.out.println(String.format("Error:%s",IO.getMessage()));
+            System.out.println(String.format("Error:%s",IO.getMessage()));
         }
         return false;
     }
@@ -349,6 +391,9 @@ public class HttpClient {
                     for (int i = 0; i < jsonMedicine.length; i++) {
                         if (!jsonMedicine[i].getMedicineName().isEmpty()) {
                             MedicineList.add(jsonMedicine[i].getMedicineName());
+                            MedicineSerialNumbers.add(jsonMedicine[i].getMedicineSerialNumber());
+
+
                         }
 
                     }
@@ -386,6 +431,7 @@ public class HttpClient {
                     for (int i = 0; i < jsonSleepDisorder.length; i++) {
                         if (!jsonSleepDisorder[i].getSleepDisorderName().isEmpty()) {
                             SleepDisorderList.add(jsonSleepDisorder[i].getSleepDisorderName());
+
                         }
 
                     }
@@ -402,25 +448,73 @@ public class HttpClient {
 
     }
 
-    public ArrayList<String> GetAllSleepConditionFromServer()throws MalformedURLException {
+    //Sleep Quality Sub Menu
+    public ArrayList<String> GetAllSleepQualitySubMenu(String i_URL)throws MalformedURLException {
 
-       // SleepConditionList.clear();
-        ArrayList Arr =  new ArrayList<>();
+            url = new URL(i_URL);
+            try {
+                initiateURLConnection("GET");
+                //read the body response
+                inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                String result = convertStreamToString(inputStream);
 
+                if (result.contains("success")) {
+                    String result2 = result.substring(58, result.length() - 2);
+                     mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+                    jsonSleepQualitySubMenu = mapper.readValue(result2.getBytes("UTF-8"), SleepQuality[].class);
+
+
+                    for (int i = 0; i < jsonSleepQualitySubMenu.length; i++) {
+                        if (!jsonSleepQualitySubMenu[i].getSleepQualityName().isEmpty()) {
+                            subMenuListSleepCondition.add(jsonSleepQualitySubMenu[i].getSleepQualityName());
+                        }
+
+                    }
+                   // System.out.println(MoodsList);
+                    inputStream.close();
+                }
+            } catch (ProtocolException pr) {
+                System.out.println(String.format("Error:%s", pr.getMessage()));
+            } catch (IOException IO) {
+               System.out.println(String.format("Error:%s", IO.getMessage()));
+            }
+
+        return subMenuListSleepCondition;
+    }
+
+    public ArrayList<String> GetAllLinks(String i_URL)throws MalformedURLException {
+
+        url = new URL(i_URL);
         try {
-           // String result2 ="[{\"sleepConditionID\":\"\",\"sleepHours\":\"10\",\"sleepQuality\":\"טובה\",\"sleepDisorders\":[{\"sleepDisorderName\":\"הרבה חלומות\"},{\"sleepDisorderName\":\"dis2\"}]}]";
-                String result2 = "[{sleepConditionID:\"\",sleepHours:\"10\",sleepQuality:\"טובה\",sleepDisorders:[{sleepDisorderName:\"כאבי ראש\"},{sleepDisorderName:\"dis2\"}]}]";
+            initiateURLConnection("GET");
+            //read the body response
+            inputStream = new BufferedInputStream(urlConnection.getInputStream());
+            String result = convertStreamToString(inputStream);
+
+            if (result.contains("success")) {
+                String result2 = result.substring(44, result.length() - 2);
                 mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-                jsonSleepCondition = mapper.readValue(result2.getBytes("UTF-8"), SleepCondition[].class);
-            SleepConditionList.add(jsonSleepCondition[0].getSleepHours());
-            SleepConditionList.add(jsonSleepCondition[0].getSleepQuality());
+                jsonLinks = mapper.readValue(result2.getBytes("UTF-8"), Links[].class);
+
+
+                for (int i = 0; i < jsonLinks.length; i++) {
+                    if (!jsonLinks[i].getLinkURL().isEmpty()) {
+                        LinksList.add(jsonLinks[i].getLinkURL());
+                    }
+
+                }
+                // System.out.println(MoodsList);
+                inputStream.close();
+            }
         } catch (ProtocolException pr) {
             System.out.println(String.format("Error:%s", pr.getMessage()));
         } catch (IOException IO) {
             System.out.println(String.format("Error:%s", IO.getMessage()));
         }
-           return SleepConditionList;
+
+        return LinksList;
     }
+
 
 
     private void initiateURLConnection(String httpMethod)throws IOException,ProtocolException {

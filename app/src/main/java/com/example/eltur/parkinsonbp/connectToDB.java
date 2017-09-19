@@ -4,6 +4,7 @@ import com.example.eltur.parkinsonbp.HttpClient.HttpClient;
 import com.example.eltur.parkinsonbp.ServerClass.ActivityUpdate;
 import com.example.eltur.parkinsonbp.ServerClass.HabitUpdate;
 import com.example.eltur.parkinsonbp.ServerClass.Medicine;
+import com.example.eltur.parkinsonbp.ServerClass.MedicineUpdate;
 import com.example.eltur.parkinsonbp.ServerClass.MoodCondition;
 import com.example.eltur.parkinsonbp.ServerClass.PatientRecord;
 import com.example.eltur.parkinsonbp.ServerClass.SleepCondition;
@@ -45,6 +46,12 @@ public class connectToDB {
     }
 
     private static List<List<SubMenu>> subMenuList = new ArrayList<List<SubMenu>>();
+
+    public static void setMedicineSerialNumbers(ArrayList<String> medicineSerialNumbers) {
+        MedicineSerialNumbers = medicineSerialNumbers;
+    }
+
+    private static ArrayList<String> MedicineSerialNumbers = new ArrayList<String>();
 
     private static Collection<SleepDisorder> SleepOrdercollection;
     private static ArrayList<String> ActivitiesArray = new ArrayList<>();
@@ -98,6 +105,16 @@ public class connectToDB {
 
     private static ArrayList<String> MoodArray = new ArrayList<>();
 
+    public static ArrayList<String> getLinksArray() {
+        return LinksArray;
+    }
+
+    public static void setLinksArray(ArrayList<String> linksArray) {
+        LinksArray = linksArray;
+    }
+
+    private static ArrayList<String> LinksArray = new ArrayList<>();
+
     public static String getUserDetails(String PatientID) throws MalformedURLException {
 
         List<String> PatientReportlist = new ArrayList<>();
@@ -109,7 +126,7 @@ public class connectToDB {
         return userName;
     }
 
-    public static String AddDataToDB(String patientID, ActivityUpdate[] userActivity, HabitUpdate[] userHargelim, ArrayList<String> userMedicine, ArrayList<String> userMoodcondition, ArrayList<String> userSleepDisorder, ArrayList<String> userSleepCondition){
+    public static String AddDataToDB(String patientID, ActivityUpdate[] userActivity, HabitUpdate[] userHargelim, MedicineUpdate[] userMedicine, ArrayList<String> userMoodcondition, SleepConditionAndDisorder sleepConditionAndDisorder){
         boolean serverResponde = false;
         PatientRecord content = new PatientRecord();
         Date date = new Date();
@@ -120,9 +137,22 @@ public class connectToDB {
 
         if(userMedicine != null)
         {
-            Collection<Medicine> collection;
-            ArrayList jsonAddMedicine =  new ArrayList<>();
+            Collection<MedicineUpdate> collection;
+            ArrayList jsonMedicine =  new ArrayList<>();
+            //  Activity[] Activitiesjson = HttpClient.getJson();
+            int i =0;
+            for ( i=0 ; i < userMedicine.length; i++) {
+                //  if (!userActivity[i].toString().isEmpty()) {
 
+                // Activitiesjson[i].setActivityName(userActivity[i].toString());
+                // Activitiesjson[i].setActivityDescription("דוגמא");
+                jsonMedicine.add(userMedicine[i]);
+                // }
+            }
+            collection = jsonMedicine;
+            content.setListOfMedicineUpdate(collection);
+           /* Collection<Medicine> collection;
+            ArrayList jsonAddMedicine =  new ArrayList<>();
             Medicine[] Medicinejson = HttpClient.getJsonMedicine();
             int i =0;
             for ( i=0 ; i < userMedicine.size(); i++) {
@@ -141,7 +171,9 @@ public class connectToDB {
                 }
             }
 
-            collection=jsonAddMedicine;
+            collection=jsonAddMedicine;*/
+
+
            // content.setListOfMedicineUpdate(collection);
         }
 
@@ -192,41 +224,11 @@ public class connectToDB {
             collection = json3;
             content.setListOfMoodCondition(collection);
         }
-
-        if(userSleepDisorder != null ) {
-
-
-
-            /*Collection<ActivityUpdate> collection;
-            ArrayList json2 =  new ArrayList<>();
-            int i =0;
-            for ( i=0 ; i < userActivity.length; i++) {
-                json2.add(userActivity[i]);
-            }
-            collection = json2;
-            content.setListOfActivityUpdate(collection);*/
-
-            ArrayList json3 =  new ArrayList<>();
-            int i =0;
-            for ( i=0 ; i < userSleepDisorder.size(); i++) {
-                if (!userSleepDisorder.get(i).toString().isEmpty()) {
-
-                  //  SleepDisorderjson[i].setSleepDisorderName(userSleepDisorder.get(i).toString());
-                    json3.add( userSleepDisorder[i]);
-                }
-            }
-            SleepOrdercollection = json3;
-            content.setSleepConditionAndDisorder(json3);
+//"sleepConditionAndDisorder":{"sleepHours":30,"sleepQuality":"ww","sleepDisorders":[{"sleepDisorderName":"כאבי ראש"},{"sleepDisorderName":"dis2"}]},
+        if(sleepConditionAndDisorder != null ) {
+            content.setSleepConditionAndDisorder(sleepConditionAndDisorder);
         }
 
-        if(userSleepCondition!= null ) {
-            getAllSleepCondition();
-            SleepCondition[] SleepConditionjson= HttpClient.getJsonSleepCondition();
-            SleepConditionjson[0].setSleepHours(userSleepCondition.get(0));
-            SleepConditionjson[0].setSleepQuality(userSleepCondition.get(1));
-            SleepConditionjson[0].setSleepDisorders(SleepOrdercollection);
-            content.setSleepCondition( SleepConditionjson[0]);
-        }
         try {
 
             serverResponde =  HttpClient.getClient().SendPatientRecordToServer("http://10.0.2.2:8080/BEAT-PD/User/Update/PatientRecord", content);
@@ -268,11 +270,11 @@ public class connectToDB {
 
 
     public static ArrayList<String> getAllMoods() {
-
+//35.166.213.224
             try {
                  MoodArray.clear();
                 HttpClient cc = new HttpClient();
-                MoodArray = cc.GetAllMoodsFromServer("http://35.166.213.224:8080/BEAT-PD/User/GET/AllMoodConditions/");
+                MoodArray = cc.GetAllMoodsFromServer("http://10.0.2.2:8080/BEAT-PD/User/GET/AllMoodConditions/");
             } catch (MalformedURLException ex) {
                 System.out.println(String.format("Error:%s", ex.getMessage()));
 
@@ -282,11 +284,24 @@ public class connectToDB {
         return MoodArray;
     }
 
+    public static ArrayList<String> GetAllLinks() {
+//35.166.213.224
+        try {
+            LinksArray.clear();
+            HttpClient cc = new HttpClient();
+            LinksArray = cc.GetAllLinks("http://10.0.2.2:8080/BEAT-PD/User/GET/AllLinks");
+        } catch (MalformedURLException ex) {
+            System.out.println(String.format("Error:%s", ex.getMessage()));
+
+        }
+        return LinksArray;
+    }
+
     public static ArrayList<String> getAllMedicines() {
         try {
             MedicineArray.clear();
             HttpClient cc = new HttpClient();
-            MedicineArray = cc.GetAllMedicineFromServer("http://35.166.213.224:8080/BEAT-PD/User/GET/AllMedicines/");
+            MedicineArray = cc.GetAllMedicineFromServer("http://10.0.2.2:8080/BEAT-PD/User/GET/AllMedicines/");
         } catch (MalformedURLException ex) {
             System.out.println(String.format("Error:%s", ex.getMessage()));
         }
@@ -298,7 +313,7 @@ public class connectToDB {
         try {
             SleepDisorderArray.clear();
             HttpClient cc = new HttpClient();
-            SleepDisorderArray = cc.GetAllSleepDisorderFromServer("http://35.166.213.224:8080/BEAT-PD/User/GET/AllSleepDisorders/");
+            SleepDisorderArray = cc.GetAllSleepDisorderFromServer("http://10.0.2.2:8080/BEAT-PD/User/GET/AllSleepDisorders/");
         } catch (MalformedURLException ex) {
             System.out.println(String.format("Error:%s", ex.getMessage()));
         }
@@ -306,19 +321,17 @@ public class connectToDB {
         return SleepDisorderArray;
     }
 
-    public static ArrayList<String> getAllSleepCondition() {
+    public static ArrayList<String> getAllSleepQualitySubMenu() {
+
+
         try {
             SleepConditionArray.clear();
             HttpClient cc = new HttpClient();
-            SleepConditionArray =  cc.GetAllSleepConditionFromServer();
+            SleepConditionArray = cc.GetAllSleepQualitySubMenu("http://10.0.2.2:8080/BEAT-PD/User/GET/AllSleepQuality");
         } catch (MalformedURLException ex) {
-            System.out.println(String.format("Error:%s", ex.getMessage()));
+            //  System.out.println(String.format("Error:%s", ex.getMessage()));
         }
-
-
-
         return SleepConditionArray;
-
     }
 
     public static List<List<SubMenu>> getSubMenuListHabit() {
@@ -326,6 +339,13 @@ public class connectToDB {
             HttpClient cc = new HttpClient();
             subMenuList = cc.getSubMenuListHabit();
         return subMenuList;
+    }
+
+    public static ArrayList<String> getMedicineSerialNumbers() {
+        // subMenuList.clear();
+        HttpClient cc = new HttpClient();
+        MedicineSerialNumbers = cc.getMedicineSerialNumbers();
+        return MedicineSerialNumbers;
     }
 
  public static void main(String args[]) throws MalformedURLException {
@@ -376,7 +396,7 @@ public class connectToDB {
     //    getUserDetails("1");
       // getAllSleepDisorder();
      // getAllSleepCondition();
-     AddDataToDB("1",null,ac,null,null,null,null);
+    // AddDataToDB("1",null,ac,null,null,null,null);
     //  getAllMedicines();
     //   AddDataToDB("1",null,null,userAct,null,null,null);
      // Activities ac = new Activities();

@@ -104,7 +104,7 @@ public class Activities extends AppCompatActivity {
                     connectToDB addactivities= new connectToDB();
                     userid = getIntent().getStringExtra("EXTRA_SESSION_ID");
 
-                    String returnVal = addactivities.AddDataToDB(userid,ac1,null,null,null,null,null);
+                    String returnVal = addactivities.AddDataToDB(userid,ac1,null,null,null,null);
 
                     if(returnVal=="Success")
                     {

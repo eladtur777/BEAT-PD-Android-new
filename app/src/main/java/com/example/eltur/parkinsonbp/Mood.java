@@ -77,7 +77,7 @@ public class Mood extends AppCompatActivity {
                 connectToDB addDataToDB= new connectToDB();
 
                 userid = getIntent().getStringExtra("EXTRA_SESSION_ID");
-                String returnVal = addDataToDB.AddDataToDB(userid,null,null,null,userchoice,null,null);
+                String returnVal = addDataToDB.AddDataToDB(userid,null,null,null,userchoice,null);
                // userchoice.clear();
 
                 if(returnVal == "Success")

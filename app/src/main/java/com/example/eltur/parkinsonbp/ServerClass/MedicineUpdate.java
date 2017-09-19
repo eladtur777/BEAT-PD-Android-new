@@ -17,6 +17,15 @@ public class MedicineUpdate {
     }
 
     private String medicineSerialNumber;
+
+    public String getMedicineName() {
+        return medicineName;
+    }
+
+    public void setMedicineName(String medicineName) {
+        this.medicineName = medicineName;
+    }
+
     private String medicineName;
 
     public String toString(){

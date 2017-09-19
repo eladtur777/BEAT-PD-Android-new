@@ -12,63 +12,44 @@ import static java.lang.String.format;
 public class SleepCondition {
 
 
+        private Long sleepConditionID;
+        private Long sleepHours;
+        private String sleepQuality;
 
-    private Long sleepConditionID;
-    private String sleepHours;
-    private String sleepQuality;
+        public SleepCondition(){}
 
-    private Collection<SleepDisorder> sleepDisorders = new ArrayList<>();
+        public SleepCondition(Long i_SleepHours, String i_SleepQuality){
+            sleepHours = i_SleepHours;
+            sleepQuality = i_SleepQuality;
+        }
+        @Override
+        public String toString(){
+            return format("{sleepConditionID:\"%d\",sleepHours:\"%d\",sleepQuality:\"%s\"}",sleepConditionID,sleepHours,sleepQuality);
+        }
 
-    public SleepCondition(){
-    }
+        public Long getSleepConditionID() {
+            return sleepConditionID;
+        }
 
-    public SleepCondition(String sleepHours, String sleepQuality, Collection<SleepDisorder> sleepDisorders){
-        this.sleepHours = sleepHours;
-        this.sleepQuality = sleepQuality;
-        this.sleepDisorders.addAll(sleepDisorders);
+        public void setSleepConditionID(Long sleepConditionID) {
+            this.sleepConditionID = sleepConditionID;
+        }
 
-    }
+        public Long getSleepHours() {
+            return sleepHours;
+        }
 
-  //  public String getSleepConditionName() {
-    //    return sleepConditionID;
-    //}
+        public void setSleepHours(Long sleepHours) {
+            this.sleepHours = sleepHours;
+        }
 
-    @Override
-    public String toString(){
-        return format("{sleepConditionID:\"%s\",sleepHours:\"%s\",sleepQuality:\"%s\",sleepDisorders:%s}",sleepConditionID,sleepHours,sleepQuality,
-               sleepDisorders.toString());
-    }
+        public String getSleepQuality() {
+            return sleepQuality;
+        }
 
-
-
-    public Long getSleepConditionID() {
-        return sleepConditionID;
-    }
-
-
-    public String getSleepHours() {
-        return sleepHours;
-    }
-
-    public void setSleepHours(String sleepHours) {
-        this.sleepHours = sleepHours;
-    }
-
-    public String getSleepQuality() {
-        return sleepQuality;
-    }
-
-    public void setSleepQuality(String sleepQuality) {
-        this.sleepQuality = sleepQuality;
-    }
-
-    public Collection<SleepDisorder> getSleepDisorders() {
-        return sleepDisorders;
-    }
-
-    public void setSleepDisorders(Collection<SleepDisorder> sleepDisorders) {
-        this.sleepDisorders = sleepDisorders;
-    }
+        public void setSleepQuality(String sleepQuality) {
+            this.sleepQuality = sleepQuality;
+        }
 }
 
 

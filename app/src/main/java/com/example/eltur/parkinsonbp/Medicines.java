@@ -15,13 +15,20 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
+import com.example.eltur.parkinsonbp.HttpClient.HttpClient;
+import com.example.eltur.parkinsonbp.ServerClass.ActivityUpdate;
+import com.example.eltur.parkinsonbp.ServerClass.MedicineUpdate;
+
 import java.util.ArrayList;
 
 public class Medicines extends AppCompatActivity {
+    private MedicineUpdate[] ma;
     Button btnSave;
     private static ArrayList<String> medicine;
     String userid ="";
     private CheckBox[] cb;
+    boolean ischkbox = false;
+    private static  ArrayList<String> MedicineSerialNumbers = new ArrayList<>();
 
 
     @Override
@@ -30,7 +37,6 @@ public class Medicines extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medicines);
-
         btnSave = (Button) findViewById(R.id.btnSaveMedicine);
         medicine = new ArrayList<String>();
         AddChkBox();
@@ -39,14 +45,30 @@ public class Medicines extends AppCompatActivity {
             public void onClick(View v) {
                 ArrayList<String> userchoice = new ArrayList<String>();
                 //userchoice.clear();
-                boolean ischkbox = false;
-                for (int i = 0; i < medicine.size(); i++) {
+                int objectSize = 0;
+                for (int i = 0; i < cb.length; i++) {
+                    if (cb[i].isChecked()) {
+                        objectSize++;
+                    }
+                }
+                ma = new MedicineUpdate[objectSize];
+                int j=0;
+                for (int i = 0; i < cb.length; i++) {
+                    if (cb[i].isChecked()) {
+                        ma[j] = new MedicineUpdate();
+                        ma[j].setMedicineSerialNumber(MedicineSerialNumbers.get(i).toString());
+                        ma[j].setMedicineName(cb[i].getText().toString());
+                        j++;
+                        ischkbox = true;
+                    }
+                }
+               /* for (int i = 0; i < medicine.size(); i++) {
                     if (cb[i].isChecked()) {
                         String val = cb[i].getText().toString();
                         userchoice.add(val);
                         ischkbox = true;
                     }
-                }
+                }*/
 
                 if(!ischkbox)
                 {
@@ -71,7 +93,7 @@ public class Medicines extends AppCompatActivity {
                 connectToDB addDataToDB= new connectToDB();
 
                 userid = getIntent().getStringExtra("EXTRA_SESSION_ID");
-                String returnVal = addDataToDB.AddDataToDB(userid,null,null,userchoice,null,null,null);
+                String returnVal = addDataToDB.AddDataToDB(userid,null,null,ma,null,null);
 
 
                 if(returnVal == "Success")
@@ -127,6 +149,7 @@ public class Medicines extends AppCompatActivity {
 
         //TODO:
         medicine = conn.getAllMedicines();
+        MedicineSerialNumbers = conn.getMedicineSerialNumbers();
 
         cb = new CheckBox[medicine.size()];
         for (int i = 0; i < medicine.size(); i++) {

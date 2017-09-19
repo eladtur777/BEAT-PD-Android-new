@@ -144,7 +144,7 @@ public class Habit extends AppCompatActivity {
 
                 userid = getIntent().getStringExtra("EXTRA_SESSION_ID");
                // String returnVal = addactivities.AddDataToDB(userid,ac,null,null,null,null,null);
-                String returnVal = addDataToDB.AddDataToDB(userid,null,ha,null,null,null,null);
+                String returnVal = addDataToDB.AddDataToDB(userid,null,ha,null,null,null);
 
 
                 if(returnVal == "Success")
